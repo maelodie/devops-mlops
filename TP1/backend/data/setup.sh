@@ -1,8 +1,12 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 sudo docker rm -f tp1-db adminer 2>/dev/null || true
 sudo docker network create app-network 2>/dev/null || true
 sudo docker volume create tp1-db-data 2>/dev/null || true
+sudo docker build -t tp1-postgres:1.0 .
 
 sudo docker run -d \
   --name tp1-db \
