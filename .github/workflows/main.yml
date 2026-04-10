@@ -9,6 +9,9 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend/simpleapi
 
     steps:
       - name: Checkout code
@@ -20,6 +23,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
+          cache-dependency-path: backend/simpleapi/pom.xml
 
       - name: Build and test with Maven
-        run: mvn clean verify
+        run: mvn --batch-mode clean verify
