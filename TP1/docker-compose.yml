@@ -34,7 +34,7 @@ services:
     build:
       context: ./frontend
     ports:
-      - "8091:80"
+      - "80:80"
     networks:
       - proxy-net
     depends_on:
