@@ -67,3 +67,15 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/tp1-frontend:latest
+  sonar-check:
+    environment: dev
+    needs: build-and-push-docker-image
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Sonar Scan
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
+
+    
+    
