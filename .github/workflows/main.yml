@@ -67,6 +67,14 @@ jobs:
           context: ./frontend
           push: true
           tags: ${{ secrets.DOCKERHUB_USER }}/tp1-frontend:latest
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/simpleapi/pom.xml
       
       - name: Sonar Scan
         run: mvn -B -f backend/simpleapi/pom.xml verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
