@@ -75,7 +75,7 @@ jobs:
 
     steps:
       - name: Sonar Scan
-        run: mvn -B verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file ./simple-api/pom.xml
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}  --file .backend/simple-api/pom.xml
 
     
     
