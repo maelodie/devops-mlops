@@ -69,8 +69,4 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USER }}/tp1-frontend:latest
       
       - name: Sonar Scan
-        run: mvn -B -f backend/simpleapi/pom.xml verify sonar:sonar \
-          -Dsonar.projectKey=maelodie_devops-mlops \
-          -Dsonar.organization=maelodie \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn -B -f backend/simpleapi/pom.xml verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
