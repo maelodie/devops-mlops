@@ -108,7 +108,7 @@ jobs:
 
   deploy-ansible:
     name: Stage 4 - Update server with Ansible
-    environment: dev
+    environment: ansible-prod
     needs: build-and-push-docker-image
     runs-on: ubuntu-24.04
     if: github.event_name == 'push' && github.ref_name == 'main' && needs.build-and-push-docker-image.result == 'success'
