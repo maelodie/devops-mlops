@@ -1,5 +1,7 @@
 ---
-app_container_name: backend
+app_container_names:
+  - backend1
+  - backend2
 app_image: maelodie/tp1-backend:latest
 app_networks:
   - name: proxy-net

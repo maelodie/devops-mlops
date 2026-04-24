@@ -12,9 +12,9 @@
   vars:
     ansible_python_interpreter: "{{ docker_python_interpreter }}"
 
-- name: Launch backend app container
+- name: Launch backend app containers
   community.docker.docker_container:
-    name: "{{ app_container_name }}"
+    name: "{{ item }}"
     image: "{{ app_image }}"
     pull: true
     env: "{{ app_env }}"
@@ -22,5 +22,6 @@
     networks: "{{ app_networks }}"
     restart_policy: unless-stopped
     state: started
+  loop: "{{ app_container_names }}"
   vars:
     ansible_python_interpreter: "{{ docker_python_interpreter }}"

@@ -1,5 +1,19 @@
 services:
-  backend:
+  backend1:
+    build:
+      context: ./backend/simpleapi
+    environment:
+      - SPRING_DATASOURCE_URL
+      - SPRING_DATASOURCE_USERNAME
+      - SPRING_DATASOURCE_PASSWORD
+    networks:
+      - proxy-net
+      - db-net
+    depends_on:
+      database:
+        condition: service_healthy
+
+  backend2:
     build:
       context: ./backend/simpleapi
     environment:
@@ -38,7 +52,8 @@ services:
     networks:
       - proxy-net
     depends_on:
-      - backend
+      - backend1
+      - backend2
 
 networks:
   proxy-net:
