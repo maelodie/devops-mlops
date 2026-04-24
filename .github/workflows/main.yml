@@ -105,3 +105,37 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USER }}/${{ matrix.image.name }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy-ansible:
+    name: Stage 4 - Update server with Ansible
+    environment: dev
+    needs: build-and-push-docker-image
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'push' && github.ref_name == 'main' && needs.build-and-push-docker-image.result == 'success'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Install Ansible Docker collection
+        run: ansible-galaxy collection install community.docker
+
+      - name: Configure SSH key permissions for deployment
+        run: chmod 600 id_rsa
+
+      - name: Run Ansible playbook
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook \
+            -i project/ansible/inventories/setup.yml \
+            project/ansible/playbook.yml \
+            -e "ansible_ssh_private_key_file=${{ github.workspace }}/id_rsa" \
+            -e "app_image=${{ secrets.DOCKERHUB_USER }}/tp1-backend:latest" \
+            -e "database_image=${{ secrets.DOCKERHUB_USER }}/tp1-postgres:latest" \
+            -e "proxy_image=${{ secrets.DOCKERHUB_USER }}/tp1-frontend:latest"
