@@ -6,8 +6,16 @@ on:
       - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test-backend:
+    name: Stage 1 - Test backend
     runs-on: ubuntu-24.04
     defaults:
       run:
@@ -28,11 +36,53 @@ jobs:
       - name: Build and test with Maven
         run: mvn --batch-mode clean verify
 
-  build-and-push-docker-image:
+  sonar-quality-gate:
+    name: Stage 2 - Sonar quality scan
     environment: dev
     needs: test-backend
     runs-on: ubuntu-24.04
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref_name == 'main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: backend/simpleapi/pom.xml
+
+      - name: Sonar Scan
+        run: >-
+          mvn -B -f backend/simpleapi/pom.xml verify sonar:sonar
+          -Dsonar.projectKey=maelodie_devops-mlops
+          -Dsonar.organization=maelodie
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
+  build-and-push-docker-image:
+    name: Stage 3 - Build and push Docker images
+    environment: dev
+    needs:
+      - test-backend
+      - sonar-quality-gate
+    runs-on: ubuntu-24.04
+    if: always() && github.event_name == 'push' && github.ref_name == 'main' && needs.test-backend.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - name: tp1-backend
+            context: ./backend/simpleapi
+          - name: tp1-postgres
+            context: ./backend/data
+          - name: tp1-frontend
+            context: ./frontend
 
     steps:
       - name: Checkout code
@@ -46,35 +96,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
-      - name: Build and push backend image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend/simpleapi
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/tp1-backend:latest
-    
-      - name: Build and push database image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./backend/data
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/tp1-postgres:latest
-    
-      - name: Build and push httpd image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USER }}/tp1-frontend:latest
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - name: Build and push ${{ matrix.image.name }} image
+        uses: docker/build-push-action@v6
         with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-          cache-dependency-path: backend/simpleapi/pom.xml
-      
-      - name: Sonar Scan
-        run: mvn -B -f backend/simpleapi/pom.xml verify sonar:sonar -Dsonar.projectKey=maelodie_devops-mlops -Dsonar.organization=maelodie -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+          context: ${{ matrix.image.context }}
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USER }}/${{ matrix.image.name }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
