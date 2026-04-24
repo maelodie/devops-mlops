@@ -42,7 +42,9 @@ services:
 
 networks:
   proxy-net:
+    external: true
   db-net:
+    external: true
 
 volumes:
   tp1-db-data:

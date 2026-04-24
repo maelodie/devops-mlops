@@ -1,0 +1,20 @@
+---
+- name: Launch database container
+  community.docker.docker_container:
+    name: "{{ database_container_name }}"
+    image: "{{ database_image }}"
+    pull: true
+    env: "{{ database_env }}"
+    volumes:
+      - "{{ database_volume_name }}:/var/lib/postgresql/data"
+    networks_cli_compatible: true
+    networks: "{{ database_networks }}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart_policy: unless-stopped
+    state: started
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"

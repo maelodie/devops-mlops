@@ -1,0 +1,30 @@
+---
+- name: Create Docker networks
+  community.docker.docker_network:
+    name: "{{ item.name }}"
+    driver: "{{ item.driver }}"
+    ipam_config:
+      - subnet: "{{ item.subnet }}"
+        gateway: "{{ item.gateway }}"
+    state: "{{ network_state }}"
+  loop: "{{ docker_networks }}"
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"
+
+- name: Display network information
+  community.docker.docker_network_info:
+    name: "{{ item.name }}"
+  register: networks_info
+  loop: "{{ docker_networks }}"
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"
+
+- name: Show created network
+  debug:
+    msg: |
+      Network Created:
+        Name: {{ item.network.Name }}
+        Driver: {{ item.network.Driver }}
+        Subnet: {{ item.network.IPAM.Config[0].Subnet | default('n/a') }}
+        Gateway: {{ item.network.IPAM.Config[0].Gateway | default('n/a') }}
+  loop: "{{ networks_info.results }}"

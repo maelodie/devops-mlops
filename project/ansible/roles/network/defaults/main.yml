@@ -1,0 +1,13 @@
+---
+docker_networks:
+  - name: proxy-net
+    driver: bridge
+    subnet: 10.0.10.0/24
+    gateway: 10.0.10.1
+  - name: db-net
+    driver: bridge
+    subnet: 10.0.11.0/24
+    gateway: 10.0.11.1
+
+network_state: present
+docker_python_interpreter: /opt/docker_venv/bin/python

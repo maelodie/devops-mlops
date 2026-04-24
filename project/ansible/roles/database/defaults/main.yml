@@ -1,0 +1,11 @@
+---
+database_container_name: database
+database_image: maelodie/tp1-postgres:latest
+database_networks:
+  - name: db-net
+database_volume_name: tp1-db-data
+database_env:
+  POSTGRES_DB: db
+  POSTGRES_USER: usr
+  POSTGRES_PASSWORD: pwd
+docker_python_interpreter: /opt/docker_venv/bin/python

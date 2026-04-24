@@ -1,0 +1,26 @@
+---
+- name: Get database container information
+  community.docker.docker_container_info:
+    name: "{{ database_container_name }}"
+  register: database_container_info
+  until:
+    - database_container_info.exists
+    - database_container_info.container.State.Health is defined
+    - database_container_info.container.State.Health.Status == "healthy"
+  retries: 15
+  delay: 3
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"
+
+- name: Launch backend app container
+  community.docker.docker_container:
+    name: "{{ app_container_name }}"
+    image: "{{ app_image }}"
+    pull: true
+    env: "{{ app_env }}"
+    networks_cli_compatible: true
+    networks: "{{ app_networks }}"
+    restart_policy: unless-stopped
+    state: started
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"

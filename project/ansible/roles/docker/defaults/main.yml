@@ -1,0 +1,5 @@
+---
+# Variables par défaut (optionnelles)
+docker_package: docker-ce
+docker_state: present
+docker_enabled: yes

@@ -1,0 +1,12 @@
+---
+app_container_name: backend
+app_image: maelodie/tp1-backend:latest
+app_networks:
+  - name: proxy-net
+  - name: db-net
+app_env:
+  SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/db
+  SPRING_DATASOURCE_USERNAME: usr
+  SPRING_DATASOURCE_PASSWORD: pwd
+database_container_name: database
+docker_python_interpreter: /opt/docker_venv/bin/python

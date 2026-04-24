@@ -1,0 +1,13 @@
+---
+- name: Launch proxy container
+  community.docker.docker_container:
+    name: "{{ proxy_container_name }}"
+    image: "{{ proxy_image }}"
+    pull: true
+    published_ports: "{{ proxy_published_ports }}"
+    networks_cli_compatible: true
+    networks: "{{ proxy_networks }}"
+    restart_policy: unless-stopped
+    state: started
+  vars:
+    ansible_python_interpreter: "{{ docker_python_interpreter }}"

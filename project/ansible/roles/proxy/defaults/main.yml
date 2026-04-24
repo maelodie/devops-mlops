@@ -1,0 +1,8 @@
+---
+proxy_container_name: httpd
+proxy_image: maelodie/tp1-frontend:latest
+proxy_networks:
+  - name: proxy-net
+proxy_published_ports:
+  - "80:80"
+docker_python_interpreter: /opt/docker_venv/bin/python
